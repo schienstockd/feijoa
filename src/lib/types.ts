@@ -21,7 +21,7 @@ export type SketchAct =
   | ({ type: 'circle';  at: Pt; r: number } & CommonStyle & Timed)
   | ({ type: 'ellipse'; at: Pt; size: Sz } & CommonStyle & Timed)
   | ({ type: 'path';    d: string } & CommonStyle & Timed)
-  | ({ type: 'text';    at: Pt; value: string; size?: number; colour?: string; weight?: number; family?: string } & Timed)
+  | ({ type: 'text';    at: Pt; value: string; size?: number; colour?: string; weight?: number; family?: string; rotate?: number } & Timed)
   | ({ type: 'cell';    at: Pt; r: number; colour?: string } & Timed)
   | { type: 'pause';  ms: number }
   | { type: 'wipe' }

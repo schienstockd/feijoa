@@ -1,30 +1,38 @@
-// HMM behaviour states — placeholder.
-// Aim: draw three cells moving in three ways (arrested / directed / meandering)
-// with a state bar underneath colouring the frames.
+// HMM behaviour states — Cecelia fits a Gaussian HMM on track measurements (speed, angle)
+// and classifies each timepoint into a hidden state. Standard states are arrested, directed,
+// meandering; each frame gets a state label, added as a categorical obs column on the tracks
+// h5ad (see app/src/tasks/behaviour/hmm_states.jl). Sketch shows three cells alongside a
+// depiction of each state's motion — stationary vs straight-line vs wandering.
 import type { SketchDefinition } from '../lib/types'
 
 export const hmm: SketchDefinition = {
   id: 'hmm',
   title: 'HMM behaviour states',
   width: 720,
-  height: 300,
-  durationSec: 4,
+  height: 340,
+  durationSec: 4.4,
   acts: [
-    { type: 'text',   at: [30, 40],   value: 'HMM behaviour states', size: 22, weight: 700, delayMs: 0,    drawMs: 400 },
-    { type: 'text',   at: [30, 65],   value: 'three cells, three ways of moving', size: 13, colour: 'textDim', delayMs: 300, drawMs: 400 },
+    { type: 'text', at: [30, 34], value: 'HMM behaviour states', size: 22, weight: 700, delayMs: 0, drawMs: 400 },
+    { type: 'text', at: [30, 58], value: 'each frame gets classified into arrested / directed / meandering', size: 13, colour: 'textDim', delayMs: 200, drawMs: 400 },
 
-    // Arrested
-    { type: 'cell',   at: [130, 160], r: 22, colour: 'blue',   delayMs: 800,  drawMs: 500 },
-    { type: 'text',   at: [90, 220],  value: 'arrested', size: 14, colour: 'textDim', delayMs: 1400, drawMs: 400 },
+    // ── Arrested — cell + dashed ring (no motion)
+    { type: 'ellipse', at: [130, 180], size: [90, 70], stroke: 'blue', strokeWidth: 1.5, fill: 'soft2', delayMs: 700, drawMs: 500 },
+    { type: 'cell',   at: [130, 180], r: 22, colour: 'blue', delayMs: 1000, drawMs: 500 },
+    { type: 'text',   at: [95, 250], value: 'arrested', size: 14, weight: 600, colour: 'blue', delayMs: 1500, drawMs: 400 },
+    { type: 'text',   at: [85, 268], value: 'stays put', size: 11, colour: 'textDim', delayMs: 1600, drawMs: 400 },
 
-    // Directed
-    { type: 'cell',   at: [340, 160], r: 22, colour: 'orange', delayMs: 900,  drawMs: 500 },
-    { type: 'arrow',  from: [370, 160], to: [430, 160], colour: 'orange',      delayMs: 1500, drawMs: 500 },
-    { type: 'text',   at: [305, 220], value: 'directed', size: 14, colour: 'textDim', delayMs: 1600, drawMs: 400 },
+    // ── Directed — start cell + arrow + faded end cell
+    { type: 'cell',   at: [305, 180], r: 22, colour: 'orange', delayMs: 1200, drawMs: 500 },
+    { type: 'arrow',  from: [335, 180], to: [415, 180], colour: 'orange', delayMs: 1700, drawMs: 500 },
+    { type: 'circle', at: [420, 180], r: 18, stroke: 'orange', strokeWidth: 1.5, delayMs: 2000, drawMs: 400 },
+    { type: 'text',   at: [312, 250], value: 'directed', size: 14, weight: 600, colour: 'orange', delayMs: 2200, drawMs: 400 },
+    { type: 'text',   at: [304, 268], value: 'straight line', size: 11, colour: 'textDim', delayMs: 2300, drawMs: 400 },
 
-    // Meandering
-    { type: 'cell',   at: [560, 160], r: 22, colour: 'yellow', delayMs: 1000, drawMs: 500 },
-    { type: 'path',   d: 'M 580 160 Q 610 130 620 165 T 660 170', stroke: 'yellow', strokeWidth: 2, delayMs: 1700, drawMs: 700 },
-    { type: 'text',   at: [510, 220], value: 'meandering', size: 14, colour: 'textDim', delayMs: 1800, drawMs: 400 },
+    // ── Meandering — cell + wavy trail + faded end cell
+    { type: 'cell',   at: [530, 180], r: 22, colour: 'yellow', delayMs: 1400, drawMs: 500 },
+    { type: 'path',   d: 'M 555 180 Q 585 145 605 180 T 655 180 T 685 175', stroke: 'yellow', strokeWidth: 3, delayMs: 1900, drawMs: 800 },
+    { type: 'circle', at: [685, 175], r: 18, stroke: 'yellow', strokeWidth: 1.5, delayMs: 2600, drawMs: 400 },
+    { type: 'text',   at: [532, 250], value: 'meandering', size: 14, weight: 600, colour: 'yellow', delayMs: 2800, drawMs: 400 },
+    { type: 'text',   at: [530, 268], value: 'wanders around', size: 11, colour: 'textDim', delayMs: 2900, drawMs: 400 },
   ],
 }

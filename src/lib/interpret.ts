@@ -269,6 +269,7 @@ function drawAct(act: SketchAct): SVGElement | null {
       t.setAttribute('font-size', String(act.size ?? 20))
       t.setAttribute('font-weight', String(act.weight ?? 400))
       t.setAttribute('font-family', act.family ?? 'inherit')
+      if (act.rotate !== undefined) t.setAttribute('transform', `rotate(${act.rotate} ${x} ${y})`)
       t.textContent = act.value
       return t
     }
