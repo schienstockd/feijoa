@@ -6,7 +6,6 @@
 // from length → 0 over `drawMs`. Filled shapes fade in alongside.
 import rough from 'roughjs'
 import type { RoughSVG } from 'roughjs/bin/svg'
-import type { Drawable } from 'roughjs/bin/core'
 import anime from 'animejs'
 import type { SketchDefinition, SketchAct, Pt } from './types'
 import { palette, paletteColour } from './palette'
