@@ -3,8 +3,10 @@
 Loose hand-drawn sketches that explain how [cecelia](https://github.com/schienstockd/cecelia)
 features work. Wobbly cells, animated tracks, a whiteboard feel. Not a product — a sketchbook.
 
-Uses [Rough.js](https://roughjs.com/) for the hand-drawn primitives and
-[animejs](https://animejs.com/) for tween sequencing.
+Precise SVG primitives with a subtle paper filter, and [animejs](https://animejs.com/) for tween
+sequencing. The aesthetic target is pastel figure drawing — crisp geometry, soft palette, pen-on-
+paper texture. (An earlier version used Rough.js; dropped because the wobble read as scribble and
+the project is effectively abandoned.)
 
 ## Play
 
