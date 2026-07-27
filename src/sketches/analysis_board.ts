@@ -11,8 +11,6 @@ export const analysisBoard: SketchDefinition = {
   height: 360,
   durationSec: 4.0,
   acts: [
-    { type: 'text', at: [30, 34], value: 'Analysis board', size: 22, weight: 700, delayMs: 0, drawMs: 400 },
-    { type: 'text', at: [30, 58], value: 'arrange plots into publish-ready A4 plates', size: 13, colour: 'textDim', delayMs: 200, drawMs: 400 },
 
     // A4 page frame — portrait-ish, page background
     { type: 'rect', at: [180, 90], size: [260, 240], stroke: 'stroke', strokeWidth: 2, fill: 'background', delayMs: 600, drawMs: 700 },

@@ -12,8 +12,6 @@ export const hmm: SketchDefinition = {
   height: 340,
   durationSec: 4.4,
   acts: [
-    { type: 'text', at: [30, 34], value: 'HMM behaviour states', size: 22, weight: 700, delayMs: 0, drawMs: 400 },
-    { type: 'text', at: [30, 58], value: 'each frame gets classified into arrested / directed / meandering', size: 13, colour: 'textDim', delayMs: 200, drawMs: 400 },
 
     // ── Arrested — cell + dashed ring (no motion)
     { type: 'ellipse', at: [130, 180], size: [90, 70], stroke: 'blue', strokeWidth: 1.5, fill: 'soft2', delayMs: 700, drawMs: 500 },

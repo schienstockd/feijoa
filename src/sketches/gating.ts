@@ -26,8 +26,6 @@ export const gating: SketchDefinition = {
   height: 400,
   durationSec: 4.2,
   acts: [
-    { type: 'text', at: [30, 34], value: 'Gating a population', size: 22, weight: 700, delayMs: 0, drawMs: 400 },
-    { type: 'text', at: [30, 58], value: 'draw a polygon; cells inside become the population', size: 13, colour: 'textDim', delayMs: 200, drawMs: 400 },
 
     // Square axes — X across the bottom, Y up the left. Same aspect the real GatePlot uses.
     { type: 'line', from: [AX.x0, AX.y0], to: [AX.x1, AX.y0], colour: 'stroke', delayMs: 600, drawMs: 500 },

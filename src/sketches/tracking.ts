@@ -23,8 +23,6 @@ export const tracking: SketchDefinition = {
   height: 300,
   durationSec: 4.1,
   acts: [
-    { type: 'text', at: [30, 34], value: 'Cell tracking', size: 22, weight: 700, delayMs: 0, drawMs: 400 },
-    { type: 'text', at: [30, 58], value: 'one cell across five frames', size: 13, colour: 'textDim', delayMs: 200, drawMs: 400 },
 
     // Track segments FIRST (drawn behind the cells) — timed so each reveals between the two
     // frames it joins.

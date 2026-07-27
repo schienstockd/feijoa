@@ -11,8 +11,6 @@ export const stats: SketchDefinition = {
   height: 340,
   durationSec: 4.0,
   acts: [
-    { type: 'text', at: [30, 34], value: 'Stats on plots', size: 22, weight: 700, delayMs: 0, drawMs: 400 },
-    { type: 'text', at: [30, 58], value: 'brackets, stars, and compact letters — right on the chart', size: 13, colour: 'textDim', delayMs: 200, drawMs: 400 },
 
     // Axes
     { type: 'line', from: [80, 260], to: [510, 260], colour: 'stroke', delayMs: 600, drawMs: 500 },

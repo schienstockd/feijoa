@@ -13,8 +13,6 @@ export const branching: SketchDefinition = {
   height: 360,
   durationSec: 4.4,
   acts: [
-    { type: 'text', at: [30, 34], value: 'Branching networks', size: 22, weight: 700, delayMs: 0, drawMs: 400 },
-    { type: 'text', at: [30, 58], value: 'skeletonise a network; measure every branch', size: 13, colour: 'textDim', delayMs: 200, drawMs: 400 },
 
     // ── Left panel: the filled network (collagen / reticular / vessel) — thick pastel paths.
     { type: 'text', at: [60, 100], value: 'network', size: 12, colour: 'textDim', delayMs: 500, drawMs: 300 },

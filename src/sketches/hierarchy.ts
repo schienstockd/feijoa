@@ -12,8 +12,6 @@ export const hierarchy: SketchDefinition = {
   height: 340,
   durationSec: 4.0,
   acts: [
-    { type: 'text', at: [30, 34], value: 'Population hierarchy', size: 22, weight: 700, delayMs: 0, drawMs: 400 },
-    { type: 'text', at: [30, 58], value: 'each gate is applied inside its parent — pops form a tree', size: 13, colour: 'textDim', delayMs: 200, drawMs: 400 },
 
     // Root (all cells) — largest ring, muted grey
     { type: 'ellipse', at: [220, 200], size: [280, 200], stroke: 'stroke', strokeWidth: 2, fill: 'soft4', delayMs: 700, drawMs: 900 },

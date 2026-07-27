@@ -11,6 +11,7 @@ import { stats } from './stats'
 import { analysisBoard } from './analysis_board'
 import { notebooks } from './notebooks'
 import { napariTracks } from './napari_tracks'
+import { regionClustering } from './region_clustering'
 
 export const sketches: Record<string, SketchDefinition> = {
   logo,
@@ -20,6 +21,7 @@ export const sketches: Record<string, SketchDefinition> = {
   gating,
   hierarchy,
   clusters,
+  region_clustering: regionClustering,
   branching,
   stats,
   analysis_board: analysisBoard,
@@ -28,11 +30,12 @@ export const sketches: Record<string, SketchDefinition> = {
 }
 
 // Ordered roughly by pipeline stage — segmentation is the entry point; the rest read from it.
-// Analysis board / notebooks / napari-tracks are report/inspection surfaces, so they come last.
+// Region clustering is grouped with clusters; analysis board / notebooks / napari-tracks are
+// report/inspection surfaces, so they come last.
 export const sketchList: SketchDefinition[] = [
-  logo, segmentation, tracking, hmm, gating, hierarchy, clusters, branching, stats,
-  analysisBoard, notebooks, napariTracks,
+  logo, segmentation, tracking, hmm, gating, hierarchy, clusters, regionClustering,
+  branching, stats, analysisBoard, notebooks, napariTracks,
 ]
 
 export { logo, hmm, gating, tracking, clusters, branching, stats, hierarchy, segmentation,
-         analysisBoard, notebooks, napariTracks }
+         analysisBoard, notebooks, napariTracks, regionClustering }

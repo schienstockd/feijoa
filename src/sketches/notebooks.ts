@@ -10,8 +10,6 @@ export const notebooks: SketchDefinition = {
   height: 360,
   durationSec: 4.0,
   acts: [
-    { type: 'text', at: [30, 34], value: 'Notebooks Playground', size: 22, weight: 700, delayMs: 0, drawMs: 400 },
-    { type: 'text', at: [30, 58], value: 'per-project Pluto notebooks — pure Julia downstream analysis', size: 13, colour: 'textDim', delayMs: 200, drawMs: 400 },
 
     // Notebook page frame
     { type: 'rect', at: [90, 90], size: [440, 250], stroke: 'stroke', strokeWidth: 1, fill: 'background', delayMs: 600, drawMs: 700 },

@@ -10,8 +10,6 @@ export const clusters: SketchDefinition = {
   height: 340,
   durationSec: 3.8,
   acts: [
-    { type: 'text', at: [30, 34], value: 'Cluster labels → populations', size: 22, weight: 700, delayMs: 0, drawMs: 400 },
-    { type: 'text', at: [30, 58], value: 'promote a Leiden cluster into a named population', size: 13, colour: 'textDim', delayMs: 200, drawMs: 400 },
 
     // Cluster 1 — blue (top-left blob)
     { type: 'circle', at: [140, 150], r: 6, fill: 'blue', stroke: 'stroke', delayMs: 700,  drawMs: 200 },

@@ -12,8 +12,6 @@ export const napariTracks: SketchDefinition = {
   height: 340,
   durationSec: 4.2,
   acts: [
-    { type: 'text', at: [30, 34], value: 'Track stats + napari tracks', size: 22, weight: 700, delayMs: 0, drawMs: 400 },
-    { type: 'text', at: [30, 58], value: 'summary stats in-app, the tracks themselves in napari', size: 13, colour: 'textDim', delayMs: 200, drawMs: 400 },
 
     // ── Left panel: in-app track-behaviour stats (mini stacked bar per group)
     { type: 'text', at: [40, 100], value: 'behaviour stats', size: 12, colour: 'textDim', delayMs: 500, drawMs: 300 },

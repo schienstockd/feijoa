@@ -12,8 +12,6 @@ export const segmentation: SketchDefinition = {
   height: 340,
   durationSec: 4.0,
   acts: [
-    { type: 'text', at: [30, 34], value: 'Segmentation', size: 22, weight: 700, delayMs: 0, drawMs: 400 },
-    { type: 'text', at: [30, 58], value: 'cellpose finds each cell — labels feed everything downstream', size: 13, colour: 'textDim', delayMs: 200, drawMs: 400 },
 
     // ── Left: raw fluorescence — soft blobs, no outlines
     { type: 'text', at: [80, 100], value: 'raw', size: 12, colour: 'textDim', delayMs: 500, drawMs: 300 },
