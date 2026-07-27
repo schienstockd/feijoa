@@ -49,7 +49,9 @@ export const branching: SketchDefinition = {
     { type: 'circle', at: [600, 210], r: 6, fill: 'accent', stroke: 'accent', delayMs: 4000, drawMs: 300 },
     { type: 'circle', at: [440, 200], r: 6, fill: 'accent', stroke: 'accent', delayMs: 4100, drawMs: 300 },
 
-    // Small readouts hint — one labelled branch length
-    { type: 'text', at: [470, 195], value: 'len 34µm', size: 11, colour: 'textDim', delayMs: 4200, drawMs: 400 },
+    // Callout for one branch — label sits well below the horizontal line, with a thin tick
+    // connecting it back to the branch it names so it doesn't overlap any skeleton segment.
+    { type: 'line', from: [485, 205], to: [485, 240], colour: 'textDim', delayMs: 4200, drawMs: 300 },
+    { type: 'text', at: [458, 253], value: 'len 34µm', size: 11, colour: 'textDim', delayMs: 4400, drawMs: 400 },
   ],
 }
