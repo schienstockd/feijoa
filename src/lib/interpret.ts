@@ -163,84 +163,37 @@ export function render(svg: SVGSVGElement, def: SketchDefinition, opts: { reduce
   }
 }
 
-// Compound "chalk on paper" filter — light and loose, but VISIBLE at card render size (sketches
-// render at ~0.79× scale in a tip card, so SVG-unit distortion halves on screen). Numbers here
-// are tuned for the rendered card, not for how they look at 1:1 in the standalone site.
-//   1. Coarse feTurbulence produces the paper-grain noise field
-//   2. feDisplacementMap feathers edges — scale 3.2 gives ~2.5px wobble on screen
-//   3. Light feGaussianBlur (0.9) softens the feathered edge into powder, not jaggies
-//   4. A second, finer feTurbulence + feComposite adds an in-shape grain overlay — the "chalk
-//      lays down unevenly on paper" effect. Multiplied at low opacity so it darkens fills
-//      subtly without turning them into noise.
+// Compound "chalk on paper" filter — meant to read LIGHT and LOOSE, not dense:
+//  1. feTurbulence produces a paper-grain noise map
+//  2. feDisplacementMap uses it to feather edges (scale 1.6 — enough that outlines wobble
+//     visibly, small enough not to become a scribble)
+//  3. feGaussianBlur softens the feathered result so edges look powdery, not jagged
 // Text lives in a sibling group with no filter, so labels stay crisp.
 function buildDefs(paperId: string): SVGDefsElement {
   const defs = document.createElementNS(SVG_NS, 'defs')
   const f = document.createElementNS(SVG_NS, 'filter')
   f.setAttribute('id', paperId)
-  f.setAttribute('x', '-8%'); f.setAttribute('y', '-8%')
-  f.setAttribute('width', '116%'); f.setAttribute('height', '116%')
-
-  // — Edge feathering
+  f.setAttribute('x', '-5%'); f.setAttribute('y', '-5%')
+  f.setAttribute('width', '110%'); f.setAttribute('height', '110%')
   const turb = document.createElementNS(SVG_NS, 'feTurbulence')
   turb.setAttribute('type', 'fractalNoise')
-  turb.setAttribute('baseFrequency', '0.75')
+  turb.setAttribute('baseFrequency', '0.9')
   turb.setAttribute('numOctaves', '2')
   turb.setAttribute('seed', '7')
-  turb.setAttribute('result', 'grainA')
-
+  turb.setAttribute('result', 'noise')
   const disp = document.createElementNS(SVG_NS, 'feDisplacementMap')
   disp.setAttribute('in', 'SourceGraphic')
-  disp.setAttribute('in2', 'grainA')
-  disp.setAttribute('scale', '3.2')
+  disp.setAttribute('in2', 'noise')
+  disp.setAttribute('scale', '1.6')
   disp.setAttribute('xChannelSelector', 'R')
   disp.setAttribute('yChannelSelector', 'G')
   disp.setAttribute('result', 'displaced')
-
   const blur = document.createElementNS(SVG_NS, 'feGaussianBlur')
   blur.setAttribute('in', 'displaced')
-  blur.setAttribute('stdDeviation', '0.9')
-  blur.setAttribute('result', 'softened')
-
-  // — In-shape grain overlay (masked to shape area, blended multiply)
-  const turb2 = document.createElementNS(SVG_NS, 'feTurbulence')
-  turb2.setAttribute('type', 'fractalNoise')
-  turb2.setAttribute('baseFrequency', '2.5')
-  turb2.setAttribute('numOctaves', '2')
-  turb2.setAttribute('seed', '3')
-  turb2.setAttribute('result', 'grainB')
-
-  // Push the noise into the alpha channel so we get a semi-transparent noise texture — the
-  // 4th row (alpha) multiplier controls how "dusty" the grain reads. Low = subtle, higher = grittier.
-  const cm = document.createElementNS(SVG_NS, 'feColorMatrix')
-  cm.setAttribute('in', 'grainB')
-  cm.setAttribute('type', 'matrix')
-  cm.setAttribute('values',
-    '0 0 0 0 0.15 ' +
-    '0 0 0 0 0.15 ' +
-    '0 0 0 0 0.15 ' +
-    '0 0 0 0.35 0')
-  cm.setAttribute('result', 'grainRGBA')
-
-  // Clip the grain to only where the shape exists (so we don't tint the background).
-  const clip = document.createElementNS(SVG_NS, 'feComposite')
-  clip.setAttribute('in', 'grainRGBA')
-  clip.setAttribute('in2', 'softened')
-  clip.setAttribute('operator', 'in')
-  clip.setAttribute('result', 'grainClipped')
-
-  // Multiply the grain over the softened shape — darkens fills unevenly to read as chalk on paper.
-  const blend = document.createElementNS(SVG_NS, 'feBlend')
-  blend.setAttribute('in', 'softened')
-  blend.setAttribute('in2', 'grainClipped')
-  blend.setAttribute('mode', 'multiply')
-
+  blur.setAttribute('stdDeviation', '0.45')
   f.appendChild(turb)
   f.appendChild(disp)
   f.appendChild(blur)
-  f.appendChild(turb2)
-  f.appendChild(cm)
-  f.appendChild(clip)
-  f.appendChild(blend)
   defs.appendChild(f)
   return defs
 }
