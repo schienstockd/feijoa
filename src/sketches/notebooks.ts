@@ -6,7 +6,7 @@ import type { SketchDefinition } from '../lib/types'
 export const notebooks: SketchDefinition = {
   id: 'notebooks',
   title: 'Notebooks Playground',
-  width: 620,
+  width: 720,
   height: 360,
   durationSec: 4.0,
   acts: [

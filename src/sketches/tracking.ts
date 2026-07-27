@@ -19,8 +19,8 @@ const P: [number, number][] = [
 export const tracking: SketchDefinition = {
   id: 'tracking',
   title: 'Cell tracking',
-  width: 620,
-  height: 300,
+  width: 720,
+  height: 360,
   durationSec: 4.1,
   acts: [
 

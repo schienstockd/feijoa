@@ -9,7 +9,7 @@ export const hmm: SketchDefinition = {
   id: 'hmm',
   title: 'HMM behaviour states',
   width: 720,
-  height: 340,
+  height: 360,
   durationSec: 4.4,
   acts: [
 

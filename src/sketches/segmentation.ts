@@ -8,8 +8,8 @@ import type { SketchDefinition } from '../lib/types'
 export const segmentation: SketchDefinition = {
   id: 'segmentation',
   title: 'Segmentation',
-  width: 640,
-  height: 340,
+  width: 720,
+  height: 360,
   durationSec: 4.0,
   acts: [
 

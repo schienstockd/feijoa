@@ -7,7 +7,7 @@ import type { SketchDefinition } from '../lib/types'
 export const analysisBoard: SketchDefinition = {
   id: 'analysis_board',
   title: 'Analysis board',
-  width: 620,
+  width: 720,
   height: 360,
   durationSec: 4.0,
   acts: [

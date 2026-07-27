@@ -8,8 +8,8 @@ import type { SketchDefinition } from '../lib/types'
 export const napariTracks: SketchDefinition = {
   id: 'napari_tracks',
   title: 'Track stats + napari tracks',
-  width: 640,
-  height: 340,
+  width: 720,
+  height: 360,
   durationSec: 4.2,
   acts: [
 

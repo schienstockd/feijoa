@@ -7,8 +7,8 @@ import type { SketchDefinition } from '../lib/types'
 export const stats: SketchDefinition = {
   id: 'stats',
   title: 'Stats on plots',
-  width: 560,
-  height: 340,
+  width: 720,
+  height: 360,
   durationSec: 4.0,
   acts: [
 

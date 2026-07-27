@@ -8,8 +8,8 @@ import type { SketchDefinition } from '../lib/types'
 export const hierarchy: SketchDefinition = {
   id: 'hierarchy',
   title: 'Population hierarchy',
-  width: 620,
-  height: 340,
+  width: 720,
+  height: 360,
   durationSec: 4.0,
   acts: [
 

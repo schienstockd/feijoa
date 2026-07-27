@@ -6,8 +6,8 @@ import type { SketchDefinition } from '../lib/types'
 export const clusters: SketchDefinition = {
   id: 'clusters',
   title: 'Cluster labels → populations',
-  width: 640,
-  height: 340,
+  width: 720,
+  height: 360,
   durationSec: 3.8,
   acts: [
 
