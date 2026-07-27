@@ -163,8 +163,12 @@ export function render(svg: SVGSVGElement, def: SketchDefinition, opts: { reduce
   }
 }
 
-// One SVG <defs> block per sketch — the paper filter is a single feTurbulence + feDisplacementMap.
-// Scale is deliberately tiny (0.9): a hint of pen-on-paper, never a scribble.
+// Compound "chalk on paper" filter — meant to read LIGHT and LOOSE, not dense:
+//  1. feTurbulence produces a paper-grain noise map
+//  2. feDisplacementMap uses it to feather edges (scale 1.6 — enough that outlines wobble
+//     visibly, small enough not to become a scribble)
+//  3. feGaussianBlur softens the feathered result so edges look powdery, not jagged
+// Text lives in a sibling group with no filter, so labels stay crisp.
 function buildDefs(paperId: string): SVGDefsElement {
   const defs = document.createElementNS(SVG_NS, 'defs')
   const f = document.createElementNS(SVG_NS, 'filter')
@@ -173,18 +177,23 @@ function buildDefs(paperId: string): SVGDefsElement {
   f.setAttribute('width', '110%'); f.setAttribute('height', '110%')
   const turb = document.createElementNS(SVG_NS, 'feTurbulence')
   turb.setAttribute('type', 'fractalNoise')
-  turb.setAttribute('baseFrequency', '1.2')
-  turb.setAttribute('numOctaves', '1')
+  turb.setAttribute('baseFrequency', '0.9')
+  turb.setAttribute('numOctaves', '2')
   turb.setAttribute('seed', '7')
   turb.setAttribute('result', 'noise')
   const disp = document.createElementNS(SVG_NS, 'feDisplacementMap')
   disp.setAttribute('in', 'SourceGraphic')
   disp.setAttribute('in2', 'noise')
-  disp.setAttribute('scale', '0.9')
+  disp.setAttribute('scale', '1.6')
   disp.setAttribute('xChannelSelector', 'R')
   disp.setAttribute('yChannelSelector', 'G')
+  disp.setAttribute('result', 'displaced')
+  const blur = document.createElementNS(SVG_NS, 'feGaussianBlur')
+  blur.setAttribute('in', 'displaced')
+  blur.setAttribute('stdDeviation', '0.45')
   f.appendChild(turb)
   f.appendChild(disp)
+  f.appendChild(blur)
   defs.appendChild(f)
   return defs
 }
@@ -329,16 +338,17 @@ function styleStroke(el: SVGElement, colour: string, width: number): void {
   el.setAttribute('stroke-linejoin', 'round')
 }
 
-// Filled shapes come out chalky, not flat — mildly translucent so overlaps read as pastel layering
-// rather than sharp poster fills. `solid` gets the strongest coverage; the rest are softer.
+// Filled shapes come out chalky, not flat — noticeably translucent so overlaps read as pastel
+// layers on paper rather than posterised digital blocks. Kept intentionally light: pastel colour
+// lays down thinly, doesn't fully cover the paper.
 function fillOpacity(fillStyle: string | undefined): number {
   switch (fillStyle) {
-    case 'solid':       return 0.9
-    case 'hachure':     return 0.55
-    case 'cross-hatch': return 0.5
-    case 'zigzag':      return 0.5
-    case 'dots':        return 0.4
-    default:            return 0.85
+    case 'solid':       return 0.72
+    case 'hachure':     return 0.42
+    case 'cross-hatch': return 0.4
+    case 'zigzag':      return 0.4
+    case 'dots':        return 0.32
+    default:            return 0.6
   }
 }
 
