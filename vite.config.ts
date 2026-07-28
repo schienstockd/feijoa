@@ -6,6 +6,8 @@ export default defineConfig(({ mode }) => {
   const isLib = mode === 'lib'
   return {
     plugins: [vue()],
+    // public/ holds the site favicon only — keep it out of the library build's dist.
+    publicDir: isLib ? false : 'public',
     build: isLib
       ? {
           lib: {

@@ -48,7 +48,8 @@ export function render(svg: SVGSVGElement, def: SketchDefinition, opts: { reduce
   gStage.appendChild(gText)
   svg.appendChild(gStage)
 
-  type Entry = { node: SVGElement; delayMs: number; drawMs: number; kind: 'draw' | 'fade' | 'wipe' }
+  type Grow = { from: number; at: Pt }
+  type Entry = { node: SVGElement; delayMs: number; drawMs: number; kind: 'draw' | 'fade' | 'wipe'; grow?: Grow }
   const timeline: Entry[] = []
   let cursor = 0
 
@@ -70,15 +71,23 @@ export function render(svg: SVGSVGElement, def: SketchDefinition, opts: { reduce
     if (node) {
       const kind: 'draw' | 'fade' = act.type === 'text' ? 'fade' : 'draw'
       ;(act.type === 'text' ? gText : gArt).appendChild(node)
-      timeline.push({ node, delayMs, drawMs, kind })
+      const g = act as { growFrom?: number; growAbout?: Pt }
+      const grow = g.growFrom !== undefined && g.growAbout ? { from: g.growFrom, at: g.growAbout } : undefined
+      timeline.push({ node, delayMs, drawMs, kind, grow })
     }
     cursor = delayMs + drawMs
   }
+
+  // Scale about a point, as an SVG transform string.
+  const growTransform = (g: Grow, k: number) =>
+    `translate(${g.at[0]} ${g.at[1]}) scale(${k}) translate(${-g.at[0]} ${-g.at[1]})`
 
   // Prep initial state — everything hidden; strokeable geometry gets its dashoffset set to length.
   for (const t of timeline) {
     if (t.kind === 'wipe') { t.node.setAttribute('opacity', '0'); continue }
     t.node.setAttribute('opacity', '0')
+    // start shrunken, so it doesn't flash at full size before the ping runs
+    if (t.grow) t.node.setAttribute('transform', growTransform(t.grow, t.grow.from))
     if (t.kind === 'draw') {
       for (const el of Array.from(t.node.querySelectorAll(STROKE_SELECTOR)) as StrokeGeom[]) {
         const len = geomLength(el)
@@ -98,6 +107,7 @@ export function render(svg: SVGSVGElement, def: SketchDefinition, opts: { reduce
       for (const t of timeline) {
         if (t.kind === 'wipe') continue
         t.node.setAttribute('opacity', '1')
+        if (t.grow) t.node.removeAttribute('transform')   // land at full size, no ping
         for (const el of Array.from(t.node.querySelectorAll(STROKE_SELECTOR)) as StrokeGeom[]) {
           el.setAttribute('stroke-dashoffset', '0')
         }
@@ -120,6 +130,20 @@ export function render(svg: SVGSVGElement, def: SketchDefinition, opts: { reduce
           }
         }, t.delayMs)
         continue
+      }
+      // "Ping" — scale up past full size and settle back. Runs alongside whatever else the act
+      // does (fade / stroke draw-in), so a pinged shape still draws itself.
+      if (t.grow) {
+        const g = t.grow
+        const k = { v: g.from }
+        tl.add({
+          targets: k,
+          v: 1,
+          duration: t.drawMs,
+          easing: 'easeOutBack',
+          update: () => t.node.setAttribute('transform', growTransform(g, k.v)),
+          complete: () => t.node.removeAttribute('transform'),
+        }, t.delayMs)
       }
       if (t.kind === 'fade') {
         tl.add({ targets: t.node, opacity: [0, 1], duration: t.drawMs }, t.delayMs)

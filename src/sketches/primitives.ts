@@ -7,7 +7,7 @@
 //   cell3 = magenta (right cell)
 // From the "vibrant" colour scheme in logo_cascade_variants.ts.
 import type { SketchAct } from '../lib/types'
-import { SCHEMES, type ColourSchemeKey } from './logo_cascade_variants'
+import { SCHEMES, type ColourSchemeKey } from './schemes'
 import { NUC_FILL } from './logo_common'
 
 export type SlotKey = 'cell1' | 'cell2' | 'cell3'
@@ -227,26 +227,10 @@ export function migrationTrack(d: string, opts: TrackOpts = {}): SketchAct {
 
 // --- Blob helper -------------------------------------------------------------------------------
 //
-// Generate a smooth closed-curve path through a set of anchor points (like a rounded polygon).
-// Uses the "midpoint + quadratic" trick: the curve passes through the midpoint of each edge,
-// with the anchor points acting as bezier control points — so the anchors become the "bulges"
-// and the curve is continuously smooth. Handy for tissue-like patches, generic region blobs,
-// or hand-shaped scatter clouds.
-export function blobPath(anchors: Array<[number, number]>): string {
-  const n = anchors.length
-  if (n < 3) return ''
-  const mid = (i: number): [number, number] => {
-    const a = anchors[i], b = anchors[(i + 1) % n]
-    return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
-  }
-  const m0 = mid(n - 1)
-  let d = `M ${m0[0]} ${m0[1]}`
-  for (let i = 0; i < n; i++) {
-    const m = mid(i)
-    d += ` Q ${anchors[i][0]} ${anchors[i][1]}, ${m[0]} ${m[1]}`
-  }
-  return d + ' Z'
-}
+// Lives in geom.ts (pure geometry, no palette deps) so the logo modules — which primitives.ts
+// itself imports from — can use it without an import cycle. Re-exported here because this is
+// where callers expect to find it.
+export { blobPath } from './geom'
 
 // --- Imaging window (pink frame) --------------------------------------------------------------
 

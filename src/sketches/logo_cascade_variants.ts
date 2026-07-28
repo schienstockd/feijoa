@@ -10,6 +10,8 @@ import {
   FRAME_AT, FRAME_SIZE, FRAME_TL, FRAME_TR, FRAME_BR, FRAME_BL,
   WORDMARK_AT, LOGO_W, LOGO_H,
 } from './logo_common'
+import { feijoaMark } from './feijoa_mark'
+import { SCHEMES, type ColourSchemeKey } from './schemes'
 
 interface Opts {
   frameStroke?: number
@@ -27,48 +29,10 @@ interface Opts {
   colourScheme?: ColourSchemeKey
 }
 
-// Colour schemes — each slot (cell1/cell2/cell3, corresponding to the blue/orange/yellow
-// positions on canvas left-to-right) has its own solid, mid-tone, dark nucleus, and track
-// colour. The "soft" fill is now a mid-tone (30% pastel + 70% saturated blend) — sitting
-// between fully saturated and pastel — per Dominik's ask.
-export type ColourSchemeKey = 'classic' | 'cool' | 'warm' | 'vibrant' | 'muted' | 'mono_pink'
-
-export interface CellColours { solid: string; soft: string; nuc: string; track: string }
-export interface ColourScheme { cell1: CellColours; cell2: CellColours; cell3: CellColours }
-
-export const SCHEMES: Record<ColourSchemeKey, ColourScheme> = {
-  classic: {
-    cell1: { solid: '#6fb8db', soft: '#90c7e2', nuc: '#3d7ea0', track: '#6fb8db' },
-    cell2: { solid: '#f4a26a', soft: '#f6b78a', nuc: '#c07a4a', track: '#f4a26a' },
-    cell3: { solid: '#d4de4a', soft: '#dce372', nuc: '#a5ad35', track: '#d4de4a' },
-  },
-  cool: {
-    cell1: { solid: '#4fb3a5', soft: '#74c3b7', nuc: '#2e6b62', track: '#4fb3a5' },
-    cell2: { solid: '#5590c8', soft: '#78a7d4', nuc: '#2e5a86', track: '#5590c8' },
-    cell3: { solid: '#8968b8', soft: '#a387c8', nuc: '#523d75', track: '#8968b8' },
-  },
-  warm: {
-    cell1: { solid: '#e05a4f', soft: '#e67d73', nuc: '#8f3229', track: '#e05a4f' },
-    cell2: { solid: '#f0894a', soft: '#f3a371', nuc: '#985028', track: '#f0894a' },
-    cell3: { solid: '#e8c94a', soft: '#edd46f', nuc: '#8f7a20', track: '#e8c94a' },
-  },
-  vibrant: {
-    // Cell1 (inside window) = cyan; cell2 (middle) = lime; cell3 (right) = magenta.
-    cell1: { solid: '#3fc3d6', soft: '#66cedd', nuc: '#1f7684', track: '#3fc3d6' },
-    cell2: { solid: '#b8d63f', soft: '#c5de66', nuc: '#6f841f', track: '#b8d63f' },
-    cell3: { solid: '#e63d8f', soft: '#ea65a5', nuc: '#8a1c56', track: '#e63d8f' },
-  },
-  muted: {
-    cell1: { solid: '#7d9db0', soft: '#99b2c0', nuc: '#3f5866', track: '#7d9db0' },
-    cell2: { solid: '#c68a6b', soft: '#d1a287', nuc: '#7a4a30', track: '#c68a6b' },
-    cell3: { solid: '#a89f6c', soft: '#b8b187', nuc: '#5f5738', track: '#a89f6c' },
-  },
-  mono_pink: {
-    cell1: { solid: '#e05a86', soft: '#e67c9e', nuc: '#8a2e50', track: '#e05a86' },
-    cell2: { solid: '#e88ab0', soft: '#eda2bf', nuc: '#9d4e6f', track: '#e88ab0' },
-    cell3: { solid: '#f0b8ce', soft: '#f3c7d8', nuc: '#a86f8b', track: '#f0b8ce' },
-  },
-}
+// Colour schemes now live in schemes.ts (see the cycle note there). Re-exported so existing
+// `from './logo_cascade_variants'` imports keep working.
+export { SCHEMES } from './schemes'
+export type { ColourSchemeKey, CellColours, ColourScheme } from './schemes'
 
 const DEFAULT_FONT = '"Segoe UI", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif'
 
@@ -86,7 +50,22 @@ const T = {
   yellow_cell_d: 1650, yellow_cell_w: 300,
   yellow_nuc_d: 1850, yellow_nuc_w: 180,
   yellow_track_d: 1900, yellow_track_w: 600,
+  feijoa_w: 620,
 }
+
+// The feijoa mark: right of the wordmark, tilted off-axis so it doesn't read as a button.
+// Sized so its skin ring (2 × 26 × scale ≈ 94) matches the wordmark's cap height, and centred on
+// the caps' midline — it reads as a sibling of the letters rather than a stray dot.
+//
+// x mirrors the gap on the other end of the logo: the imaging window's right edge (155) sits 25
+// before the wordmark (180), so the mark sits 25 after the rightmost art — the yellow/magenta
+// cell, whose path tops out at x≈707. Left edge 732, plus the rotated half-width (~43) → 775.
+const FEIJOA_AT: [number, number] = [775, 146]
+const FEIJOA_SCALE = 1.8
+const FEIJOA_ROTATE = 30
+const FEIJOA_STROKE = 4.5     // proportional to the enlarged mark, matching the cells' weight
+const FEIJOA_GAP = 140        // baseline ms of breathing room after the last other act
+const FEIJOA_GROW_FROM = 0.12
 
 type Position = 'blue' | 'orange' | 'yellow'
 type Slot = 'cell1' | 'cell2' | 'cell3'
@@ -196,5 +175,26 @@ export function makeCascade(id: string, title: string, opts: Opts = {}): SketchD
     delayMs: T.wordmark_d * s, drawMs: T.wordmark_w * s,
   })
 
-  return { id, title, width: LOGO_W, height: LOGO_H, durationSec: duration, acts }
+  // Feijoa mark — the namesake fruit, sitting to the right of the wordmark and tilted slightly
+  // so it doesn't read as a button. It lands LAST, after everything else has settled: derived
+  // from the actual end of the acts above rather than a fixed constant, because which element
+  // finishes last depends on `order` (sync ends with the wordmark; boy/yob with the yellow track).
+  const feijoaDelay = endOf(acts) + FEIJOA_GAP * s
+  acts.push(...feijoaMark(FEIJOA_AT[0], FEIJOA_AT[1], {
+    scale: FEIJOA_SCALE, rotate: FEIJOA_ROTATE, growFrom: FEIJOA_GROW_FROM,
+    strokeWidth: FEIJOA_STROKE, delayMs: feijoaDelay, drawMs: T.feijoa_w * s,
+  }))
+
+  // The mark can run past the nominal duration on the slower orders — report what it actually takes.
+  const durationSec = Math.max(duration, endOf(acts) / 1000)
+
+  return { id, title, width: LOGO_W, height: LOGO_H, durationSec, acts }
+}
+
+// Latest point at which any act has finished drawing.
+function endOf(acts: SketchAct[]): number {
+  return acts.reduce((max, a) => {
+    const t = a as { delayMs?: number; drawMs?: number }
+    return Math.max(max, (t.delayMs ?? 0) + (t.drawMs ?? 0))
+  }, 0)
 }

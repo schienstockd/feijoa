@@ -1,7 +1,7 @@
 # Sketch character — parked plan
 
 The revised prompt lives at
-`cecelia-pineapple/docs/prompts/feijoa-improve-prompt.md`. This plan is
+`cecelia-feijoa/docs/prompts/feijoa-improve-prompt.md`. This plan is
 its build sequence + locked decisions.
 
 ## Locked decisions

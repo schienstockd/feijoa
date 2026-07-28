@@ -18,6 +18,11 @@ export interface Timed {
   delayMs?: number
   drawMs?: number
   timing?: TimingHint
+  // Optional "ping": scale the act up from `growFrom` to full size about the point `growAbout`,
+  // overshooting slightly and settling back (easeOutBack). Both must be set together — without a
+  // centre there's nothing to scale about. Use it to make something land rather than fade in.
+  growFrom?: number
+  growAbout?: Pt
 }
 
 export type SketchAct =
