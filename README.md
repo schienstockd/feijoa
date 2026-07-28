@@ -1,4 +1,4 @@
-# feijoa
+# <img src="public/feijoa.svg" alt="" width="30" align="top"> feijoa
 
 Loose hand-drawn sketches that explain how [cecelia](https://github.com/schienstockd/cecelia)
 features work. Wobbly cells, animated tracks, a whiteboard feel. Not a product — a sketchbook.
