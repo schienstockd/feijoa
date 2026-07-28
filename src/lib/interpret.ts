@@ -1,21 +1,21 @@
 // Interprets a SketchDefinition by drawing precise SVG primitives, then animating each element's
-// opacity + stroke-dashoffset with animejs. The aesthetic target is *pastel figure drawing*, not
-// wobble — crisp geometry, soft palette, round stroke caps, and a subtle paper filter for pen-
-// on-paper texture. Rough.js used to live here; it produced too much scribble and the upstream
-// project is effectively abandoned (last release 2022).
+// opacity + stroke-dashoffset with animejs. Character comes from font, stroke weight, and timing
+// — not post-processing. No SVG filters on paths; the earlier feTurbulence/feDisplacementMap
+// paper filter read as "vector with texture" and has been removed.
 //
 // The trick for "someone is drawing this": every strokeable element gets its total length
 // measured via getTotalLength(), stroke-dasharray set to that length, and stroke-dashoffset
 // animated from length → 0 over `drawMs`. Filled shapes fade in alongside.
+//
+// `timing?: 'fast' | 'normal' | 'deliberate'` on an act multiplies its effective `drawMs`
+// (fast 0.5×, normal 1×, deliberate 1.7×) so authors declare importance without picking exact ms.
 import anime from 'animejs'
-import type { SketchDefinition, SketchAct, Pt } from './types'
+import type { SketchDefinition, SketchAct, Pt, TimingHint } from './types'
 import { palette, paletteColour } from './palette'
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
 
-// One-off id for the paper filter — each sketch owns its own defs so several SketchCanvases can
-// coexist on a page (e.g. the What's New modal listing multiple tips).
-let filterCounter = 0
+const TIMING_MULT: Record<TimingHint, number> = { fast: 0.5, normal: 1, deliberate: 1.7 }
 
 export interface PlayHandle {
   play: () => void
@@ -33,9 +33,6 @@ export function render(svg: SVGSVGElement, def: SketchDefinition, opts: { reduce
   svg.setAttribute('viewBox', `0 0 ${def.width} ${def.height}`)
   svg.setAttribute('preserveAspectRatio', 'xMidYMid meet')
 
-  const paperId = `feijoa-paper-${++filterCounter}`
-  svg.appendChild(buildDefs(paperId))
-
   const bg = document.createElementNS(SVG_NS, 'rect')
   bg.setAttribute('x', '0'); bg.setAttribute('y', '0')
   bg.setAttribute('width', String(def.width))
@@ -43,12 +40,9 @@ export function render(svg: SVGSVGElement, def: SketchDefinition, opts: { reduce
   bg.setAttribute('fill', def.background ?? palette.background)
   svg.appendChild(bg)
 
-  // Stage sits under the paper filter — subtle pen-on-paper displacement across all shapes.
-  // Text is added outside the filtered group so labels stay crisp.
   const gStage = document.createElementNS(SVG_NS, 'g')
   gStage.setAttribute('class', 'stage')
   const gArt = document.createElementNS(SVG_NS, 'g')
-  gArt.setAttribute('filter', `url(#${paperId})`)
   gStage.appendChild(gArt)
   const gText = document.createElementNS(SVG_NS, 'g')
   gStage.appendChild(gText)
@@ -69,7 +63,9 @@ export function render(svg: SVGSVGElement, def: SketchDefinition, opts: { reduce
       continue
     }
     const delayMs = (act as { delayMs?: number }).delayMs ?? cursor
-    const drawMs  = (act as { drawMs?: number }).drawMs ?? 600
+    const rawDrawMs = (act as { drawMs?: number }).drawMs ?? 600
+    const timing = (act as { timing?: TimingHint }).timing
+    const drawMs = timing ? Math.round(rawDrawMs * TIMING_MULT[timing]) : rawDrawMs
     const node = drawAct(act)
     if (node) {
       const kind: 'draw' | 'fade' = act.type === 'text' ? 'fade' : 'draw'
@@ -163,44 +159,20 @@ export function render(svg: SVGSVGElement, def: SketchDefinition, opts: { reduce
   }
 }
 
-// One SVG <defs> block per sketch — the paper filter is a single feTurbulence + feDisplacementMap.
-// Scale is deliberately tiny (0.9): a hint of pen-on-paper, never a scribble.
-function buildDefs(paperId: string): SVGDefsElement {
-  const defs = document.createElementNS(SVG_NS, 'defs')
-  const f = document.createElementNS(SVG_NS, 'filter')
-  f.setAttribute('id', paperId)
-  f.setAttribute('x', '-5%'); f.setAttribute('y', '-5%')
-  f.setAttribute('width', '110%'); f.setAttribute('height', '110%')
-  const turb = document.createElementNS(SVG_NS, 'feTurbulence')
-  turb.setAttribute('type', 'fractalNoise')
-  turb.setAttribute('baseFrequency', '1.2')
-  turb.setAttribute('numOctaves', '1')
-  turb.setAttribute('seed', '7')
-  turb.setAttribute('result', 'noise')
-  const disp = document.createElementNS(SVG_NS, 'feDisplacementMap')
-  disp.setAttribute('in', 'SourceGraphic')
-  disp.setAttribute('in2', 'noise')
-  disp.setAttribute('scale', '0.9')
-  disp.setAttribute('xChannelSelector', 'R')
-  disp.setAttribute('yChannelSelector', 'G')
-  f.appendChild(turb)
-  f.appendChild(disp)
-  defs.appendChild(f)
-  return defs
-}
-
 function drawAct(act: SketchAct): SVGElement | null {
   switch (act.type) {
     case 'line': {
       const [x1, y1] = act.from, [x2, y2] = act.to
-      return strokeLine(x1, y1, x2, y2, paletteColour(act.colour, palette.stroke), 2)
+      const [ex1, ey1, ex2, ey2] = overshootEndpoints(x1, y1, x2, y2, act.overshoot)
+      return strokeLine(ex1, ey1, ex2, ey2, paletteColour(act.colour, palette.stroke), act.strokeWidth ?? 2)
     }
     case 'arrow': {
       const [x1, y1] = act.from, [x2, y2] = act.to
       const colour = paletteColour(act.colour, palette.stroke)
+      const w = act.strokeWidth ?? 2
       const g = document.createElementNS(SVG_NS, 'g')
-      g.appendChild(strokeLine(x1, y1, x2, y2, colour, 2))
-      g.appendChild(arrowhead(act.from, act.to, colour))
+      g.appendChild(strokeLine(x1, y1, x2, y2, colour, w))
+      g.appendChild(arrowhead(act.from, act.to, colour, w))
       return g
     }
     case 'rect': {
@@ -243,8 +215,8 @@ function drawAct(act: SketchAct): SVGElement | null {
       return g
     }
     case 'cell': {
-      // Cell = filled body + softer inner nucleus. Both precise circles; the paper filter above
-      // gives them a hint of pen-on-paper.
+      // Cell = filled body + softer inner nucleus. Precise circles; character comes from the
+      // enclosing sketch's stroke weights, not from a texture filter.
       const [x, y] = act.at
       const colour = paletteColour(act.colour, palette.blue)
       const g = document.createElementNS(SVG_NS, 'g')
@@ -348,13 +320,24 @@ function geomLength(el: SVGElement): number {
   try { return g.getTotalLength() } catch { return 0 }
 }
 
-function arrowhead(_from: Pt, to: Pt, colour: string): SVGPathElement {
+function arrowhead(_from: Pt, to: Pt, colour: string, width: number): SVGPathElement {
   const [x, y] = to
   const tip = document.createElementNS(SVG_NS, 'path')
   tip.setAttribute('d', `M ${x - 10} ${y - 6} L ${x} ${y} L ${x - 10} ${y + 6}`)
   tip.setAttribute('fill', 'none')
-  styleStroke(tip, colour, 2)
+  styleStroke(tip, colour, width)
   return tip
+}
+
+// Extend a line by `overshoot` px past each end along its own direction. Small positive values
+// (2-3px) give the "hand didn't stop exactly at the join" feel; 0/undefined is a snap.
+function overshootEndpoints(x1: number, y1: number, x2: number, y2: number, overshoot: number | undefined): [number, number, number, number] {
+  if (!overshoot) return [x1, y1, x2, y2]
+  const dx = x2 - x1, dy = y2 - y1
+  const len = Math.hypot(dx, dy)
+  if (len === 0) return [x1, y1, x2, y2]
+  const ux = dx / len, uy = dy / len
+  return [x1 - ux * overshoot, y1 - uy * overshoot, x2 + ux * overshoot, y2 + uy * overshoot]
 }
 
 function darken(hex: string, amount: number): string {

@@ -1,43 +1,49 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import SketchCanvas from './lib/SketchCanvas.vue'
 import { sketches, sketchList } from './sketches'
 
-const selectedId = ref(sketchList[0].id)
-const selected = computed(() => sketches[selectedId.value])
-const canvasRef = ref<InstanceType<typeof SketchCanvas> | null>(null)
+const logo = sketches.logo
+// Everything else in a 3-column grid, in pipeline order.
+const grid = sketchList.filter(s => s.id !== 'logo')
 
-function replay() {
-  canvasRef.value?.reset()
-  canvasRef.value?.play()
+const logoRef = ref<InstanceType<typeof SketchCanvas> | null>(null)
+const gridRefs = ref<Array<InstanceType<typeof SketchCanvas> | null>>([])
+
+function replayLogo() {
+  logoRef.value?.reset()
+  logoRef.value?.play()
+}
+function replayAll() {
+  logoRef.value?.reset(); logoRef.value?.play()
+  for (const c of gridRefs.value) { c?.reset(); c?.play() }
 }
 </script>
 
 <template>
   <main>
     <header>
-      <h1>feijoa</h1>
-      <p>hand-drawn sketches for <a href="https://github.com/schienstockd/cecelia">cecelia</a> — aussie tool, aussie fruit.</p>
+      <div>
+        <h1>feijoa</h1>
+        <p>hand-drawn sketches for <a href="https://github.com/schienstockd/cecelia">cecelia</a> — aussie tool, aussie fruit.</p>
+      </div>
+      <button class="replay-all" @click="replayAll">↻ replay all</button>
     </header>
 
-    <nav>
-      <button
-        v-for="s in sketchList"
-        :key="s.id"
-        :class="{ active: s.id === selectedId }"
-        @click="selectedId = s.id"
-      >{{ s.title }}</button>
-    </nav>
-
-    <section class="stage">
-      <div class="canvas-wrap">
-        <SketchCanvas ref="canvasRef" :definition="selected" :key="selectedId" />
-      </div>
-      <div class="toolbar">
-        <span class="hint">{{ selected.title }} · {{ selected.durationSec.toFixed(1) }}s</span>
-        <button @click="replay">↻ replay</button>
-      </div>
+    <section class="logo-stage">
+      <SketchCanvas ref="logoRef" :definition="logo" />
+      <button class="stage-replay" @click="replayLogo" aria-label="replay logo">↻</button>
     </section>
+
+    <div class="grid">
+      <article v-for="(s, i) in grid" :key="s.id" class="tile">
+        <SketchCanvas
+          :ref="el => (gridRefs[i] = el as InstanceType<typeof SketchCanvas>)"
+          :definition="s"
+        />
+        <div class="tile-title">{{ s.title }}</div>
+      </article>
+    </div>
 
     <footer>
       <a href="https://github.com/schienstockd/feijoa">source</a>
@@ -47,60 +53,70 @@ function replay() {
 </template>
 
 <style scoped>
-main { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem; }
-header { margin-bottom: 1.5rem; }
+main { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 1.5rem; gap: 1rem;
+}
 h1 { font-size: 1.6rem; font-weight: 700; }
+header p { margin-top: 0.15rem; }
 header p a { color: var(--f-accent); text-decoration: none; border-bottom: 1px solid transparent; }
 header p a:hover { border-bottom-color: var(--f-accent); }
 
-nav { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
-nav button {
-  border: 1px solid var(--f-border);
-  background: var(--f-surface);
-  color: var(--f-text-dim);
-  padding: 0.4rem 0.85rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 120ms ease;
-}
-nav button:hover { color: var(--f-text); border-color: #d0ccc0; }
-nav button.active {
-  background: var(--f-accent);
-  color: #ffffff;
-  border-color: var(--f-accent);
-}
-
-.stage {
-  background: var(--f-surface);
-  border: 1px solid var(--f-border);
-  border-radius: 12px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-.canvas-wrap { min-height: 260px; display: flex; align-items: center; justify-content: center; }
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid var(--f-border);
-  padding-top: 0.5rem;
-}
-.hint { color: var(--f-text-dim); font-size: 0.8rem; }
-.toolbar button {
+.replay-all {
   background: transparent;
   border: 1px solid var(--f-border);
   color: var(--f-text-dim);
-  padding: 0.3rem 0.75rem;
+  padding: 0.4rem 0.85rem;
   border-radius: 6px;
   font-size: 0.85rem;
   font-family: inherit;
   cursor: pointer;
+  white-space: nowrap;
 }
-.toolbar button:hover { color: var(--f-text); }
+.replay-all:hover { color: var(--f-text); }
+
+.logo-stage {
+  position: relative;
+  background: var(--f-surface);
+  border: 1px solid var(--f-border);
+  border-radius: 12px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.25rem;
+}
+.stage-replay {
+  position: absolute; top: 0.6rem; right: 0.6rem;
+  background: transparent;
+  border: 1px solid var(--f-border);
+  color: var(--f-text-dim);
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.stage-replay:hover { color: var(--f-text); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.tile {
+  background: var(--f-surface);
+  border: 1px solid var(--f-border);
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem 0.6rem;
+  display: flex; flex-direction: column;
+  gap: 0.4rem;
+}
+.tile-title {
+  color: var(--f-text-dim);
+  font-size: 0.8rem;
+  text-align: center;
+  padding-top: 0.2rem;
+  border-top: 1px solid var(--f-border);
+}
 
 footer { margin-top: 1.5rem; color: var(--f-text-dim); font-size: 0.85rem; }
 footer a { color: var(--f-text-dim); border-bottom: 1px dotted var(--f-text-dim); text-decoration: none; }
