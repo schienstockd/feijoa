@@ -9,7 +9,7 @@
 // label id pops in near each. Outline uses the same path as the blob — the segmentation is
 // literally tracing the fluorescent object.
 import type { SketchDefinition, SketchAct } from '../lib/types'
-import { cellPath, scanningCellPath, SCHEME, STROKE } from './primitives'
+import { cellPath, scanningCellPath, SCHEME } from './primitives'
 
 // Image panel
 const P_X = 60, P_Y = 45, P_W = 600, P_H = 285

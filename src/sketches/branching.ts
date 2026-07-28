@@ -5,7 +5,7 @@
 // Sketch: filled fibrous network on the LEFT (lime — evokes SHG green), skeletonised network
 // with branch-point nodes on the RIGHT. Same topology in both, arrow implies the transform.
 import type { SketchDefinition, SketchAct } from '../lib/types'
-import { SCHEME, STROKE } from './primitives'
+import { SCHEME } from './primitives'
 
 // Branch definitions — one entry per branch, with LEFT-panel and RIGHT-panel path strings.
 // Right paths mirror lefts, shifted +340 px in x.
