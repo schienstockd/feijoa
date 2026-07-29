@@ -12,6 +12,7 @@ import { analysisBoard } from './analysis_board'
 import { notebooks } from './notebooks'
 import { napariTracks } from './napari_tracks'
 import { regionClustering } from './region_clustering'
+import { claudeMcp } from './claude_mcp'
 
 export const sketches: Record<string, SketchDefinition> = {
   logo,
@@ -27,15 +28,16 @@ export const sketches: Record<string, SketchDefinition> = {
   analysis_board: analysisBoard,
   notebooks,
   napari_tracks: napariTracks,
+  claude_mcp: claudeMcp,
 }
 
 // Ordered roughly by pipeline stage — segmentation is the entry point; the rest read from it.
 // Region clustering is grouped with clusters; analysis board / notebooks / napari-tracks are
-// report/inspection surfaces, so they come last.
+// report/inspection surfaces, so they come last — with the Claude/MCP assist surface after them.
 export const sketchList: SketchDefinition[] = [
   logo, segmentation, tracking, hmm, gating, hierarchy, clusters, regionClustering,
-  branching, stats, analysisBoard, notebooks, napariTracks,
+  branching, stats, analysisBoard, notebooks, napariTracks, claudeMcp,
 ]
 
 export { logo, hmm, gating, tracking, clusters, branching, stats, hierarchy, segmentation,
-         analysisBoard, notebooks, napariTracks, regionClustering }
+         analysisBoard, notebooks, napariTracks, regionClustering, claudeMcp }
